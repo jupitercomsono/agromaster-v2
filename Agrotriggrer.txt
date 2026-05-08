@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>AgroTrigger 🌾</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{overflow:hidden;background:#111;font-family:sans-serif;color:white;touch-action:none;user-select:none;}
+
+/* FUNDO */
+#bg{
+position:fixed;inset:0;
+background:linear-gradient(180deg,#0a2a0a 0%,#1a4a1a 45%,#2d5a1a 50%,#1a3a0a 100%);
+z-index:0;
+}
+#bg::after{
+content:’’;position:absolute;inset:0;
+background:radial-gradient(ellipse at 50% 100%,#3a6a1a 0%,transparent 60%);
+}
+
+/* HUD */
+#hud{
+position:fixed;top:0;left:0;right:0;
+display:flex;justify-content:space-between;align-items:center;
+padding:12px 16px;
+background:linear-gradient(#000000bb,transparent);
+z-index:20;pointer-events:none;
+}
+#hud-left{display:flex;flex-direction:column;gap:2px;}
+#score-display{font-size:22px;font-weight:900;color:#f9c74f;text-shadow:0 2px 6px #000;}
+#wave-display{font-size:11px;color:#ffffffaa;letter-spacing:2px;}
+#lives-display{font-size:22px;letter-spacing:3px;}
+
+/* CROSSHAIR */
+#crosshair{
+position:fixed;top:50%;left:50%;
+transform:translate(-50%,-50%);
+width:36px;height:36px;
+pointer-events:none;z-index:20;
+}
+#crosshair::before,#crosshair::after{
+content:’’;position:absolute;background:#ffffffdd;
+border-radius:2px;
+}
+#crosshair::before{width:2px;height:100%;left:50%;transform:translateX(-50%);}
+#crosshair::after{width:100%;height:2px;top:50%;transform:translateY(-50%);}
+.crosshair-ring{
+position:absolute;inset:-4px;border-radius:50%;
+border:2px solid #ffffffaa;
+}
+
+/* INIMIGOS */
+.enemy{
+position:fixed;
+display:flex;flex-direction:column;align-items:center;gap:2px;
+cursor:pointer;z-index:10;
+transition:none;
+filter:drop-shadow(0 4px 8px #00000088);
+}
+.enemy-emoji{
+font-size:52px;
+animation:enemyFloat 1.5s ease-in-out infinite;
+display:block;
+}
+@keyframes enemyFloat{
+0%,100%{transform:rotate(-5deg);}
+50%{transform:rotate(5deg);}
+}
+.enemy-name{
+font-size:10px;font-weight:700;
+background:#000000cc;border-radius:6px;
+padding:2px 6px;white-space:nowrap;
+border:1px solid #ffffff22;
+}
+.enemy-hp-bar{
+width:50px;height:4px;
+background:#ffffff33;border-radius:99px;overflow:hidden;
+}
+.enemy-hp-fill{
+height:100%;border-radius:99px;
+transition:width .2s;
+}
+.enemy.hit{animation:enemyHit .15s ease;}
+@keyframes enemyHit{
+0%{filter:brightness(3) drop-shadow(0 0 12px #fff);}
+100%{filter:drop-shadow(0 4px 8px #00000088);}
+}
+.enemy.dying{animation:enemyDie .4s ease forwards;}
+@keyframes enemyDie{
+0%{transform:scale(1);opacity:1;}
+50%{transform:scale(1.4);opacity:.8;}
+100%{transform:scale(0);opacity:0;}
+}
+
+/* PARTÍCULAS */
+.particle{
+position:fixed;pointer-events:none;z-index:30;
+font-size:20px;animation:particleFly .6s ease forwards;
+}
+@keyframes particleFly{
+0%{transform:translate(0,0) scale(1);opacity:1;}
+100%{transform:translate(var(–dx),var(–dy)) scale(0);opacity:0;}
+}
+
+/* FLASH */
+#hit-flash{
+position:fixed;inset:0;pointer-events:none;z-index:25;
+background:#ef444433;display:none;
+}
+#hit-flash.show{display:block;animation:flashAnim .2s ease;}
+#good-flash{
+position:fixed;inset:0;pointer-events:none;z-index:25;
+background:#22c55e22;display:none;
+}
+#good-flash.show{display:block;animation:flashAnim .15s ease;}
+@keyframes flashAnim{0%{opacity:1}100%{opacity:0}}
+
+/* MUNIÇÕES */
+#ammo-section{
+position:fixed;bottom:0;left:0;right:0;
+background:linear-gradient(transparent,#000000dd);
+padding:10px 10px 20px;z-index:20;
+}
+#ammo-label{
+font-size:10px;color:#ffffffaa;letter-spacing:2px;
+text-align:center;margin-bottom:6px;
+}
+#ammo-bar{
+display:grid;
+grid-template-columns:repeat(7,1fr);
+gap:4px;
+}
+.ammo-btn{
+width:100%;aspect-ratio:1;
+border-radius:10px;border:2px solid;
+display:flex;flex-direction:column;
+align-items:center;justify-content:center;
+gap:1px;cursor:pointer;
+transition:transform .15s,box-shadow .15s;
+padding:2px;
+}
+.ammo-btn:active{transform:scale(.88);}
+.ammo-btn.selected{
+transform:scale(1.08);
+box-shadow:0 0 12px currentColor;
+}
+.ammo-icon{font-size:18px;}
+.ammo-name{font-size:8px;font-weight:700;text-align:center;line-height:1.1;}
+.ammo-type{font-size:7px;opacity:.6;text-align:center;}
+
+/* NOTIF FLUTUANTE */
+.float-notif{
+position:fixed;left:50%;
+transform:translateX(-50%);
+background:#000000cc;border:1px solid #ffffff22;
+border-radius:10px;padding:8px 16px;
+font-size:14px;font-weight:700;
+pointer-events:none;z-index:40;
+animation:floatUp .8s ease forwards;
+white-space:nowrap;
+}
+@keyframes floatUp{
+0%{opacity:1;top:45%;}
+100%{opacity:0;top:30%;}
+}
+
+/* ── TELAS ── */
+.screen{
+position:fixed;inset:0;
+display:none;flex-direction:column;
+align-items:center;justify-content:center;
+padding:24px 20px;z-index:50;gap:14px;
+}
+.screen.active{display:flex;}
+
+/* HOME */
+#home{background:radial-gradient(ellipse at 50% 30%,#0d2a0d,#060e06);}
+.title{
+font-size:54px;font-weight:900;
+color:#f9c74f;text-align:center;
+text-shadow:0 0 40px #f9c74f66;line-height:1;
+}
+.subtitle{font-size:12px;color:#ffffffaa;letter-spacing:3px;text-transform:uppercase;}
+.home-info{
+background:#ffffff08;border:1px solid #ffffff15;
+border-radius:14px;padding:14px 16px;
+font-size:13px;color:#ffffffcc;line-height:1.8;
+max-width:320px;text-align:center;
+}
+.home-info b{color:#f9c74f;}
+.btn-green{
+background:linear-gradient(135deg,#22c55e,#16a34a);
+color:#fff;border:none;border-radius:14px;
+padding:15px 48px;font-size:19px;font-weight:900;
+cursor:pointer;box-shadow:0 6px 24px #22c55e44;
+transition:transform .15s;letter-spacing:1px;
+}
+.btn-green:active{transform:scale(.96);}
+
+/* GAME OVER */
+#gameover{background:#000000f2;}
+.go-title{font-size:44px;font-weight:900;color:#ef4444;text-align:center;}
+.go-enemy{font-size:60px;}
+.go-killed-by{font-size:13px;color:#ffffffaa;text-align:center;}
+.go-card{
+width:100%;max-width:380px;
+border-radius:14px;padding:14px 16px;
+border-left:4px solid;
+}
+.go-card.wrong{background:#ef444415;border-color:#ef4444;}
+.go-card.right{background:#22c55e15;border-color:#22c55e;}
+.go-card-title{
+font-size:10px;letter-spacing:2px;text-transform:uppercase;
+margin-bottom:6px;font-weight:700;
+}
+.go-card.wrong .go-card-title{color:#ef4444;}
+.go-card.right .go-card-title{color:#22c55e;}
+.go-card-text{font-size:13px;color:#ffffffcc;line-height:1.65;}
+.go-card-text b{color:#fff;}
+.go-stats{display:flex;gap:10px;width:100%;max-width:380px;}
+.go-stat{
+flex:1;background:#ffffff0a;border-radius:12px;
+padding:10px;text-align:center;
+}
+.go-stat-v{font-size:26px;font-weight:900;}
+.go-stat-l{font-size:10px;color:#ffffff88;text-transform:uppercase;letter-spacing:1px;}
+.btn-retry{
+background:linear-gradient(135deg,#f9c74f,#f3722c);
+color:#0a0a0a;border:none;border-radius:14px;
+padding:14px 44px;font-size:18px;font-weight:900;
+cursor:pointer;transition:transform .15s;
+}
+.btn-retry:active{transform:scale(.96);}
+.btn-menu{
+background:none;border:1px solid #ffffff33;
+border-radius:14px;padding:11px 32px;
+color:#ffffffaa;font-size:14px;font-weight:700;
+cursor:pointer;
+}
+</style>
+
+</head>
+<body>
+
+<!-- FUNDO -->
+
+<div id="bg"></div>
+
+<!-- FLASHES -->
+
+<div id="hit-flash"></div>
+<div id="good-flash"></div>
+
+<!-- CROSSHAIR -->
+
+<div id="crosshair"><div class="crosshair-ring"></div></div>
+
+<!-- HUD -->
+
+<div id="hud">
+  <div id="hud-left">
+    <div id="score-display">⭐ 0</div>
+    <div id="wave-display">WAVE 1</div>
+  </div>
+  <div id="lives-display">❤️❤️❤️</div>
+</div>
+
+<!-- MUNIÇÕES -->
+
+<div id="ammo-section">
+  <div id="ammo-label">🧪 SELECIONE O DEFENSIVO</div>
+  <div id="ammo-bar"></div>
+</div>
+
+<!-- ══ HOME ══ -->
+
+<div class="screen active" id="home">
+  <div style="font-size:58px;animation:enemyFloat 2s infinite">🌾</div>
+  <div class="title">AGRO<br>TRIGGER</div>
+  <div class="subtitle">Defenda sua lavoura</div>
+  <div class="home-info">
+    Toque no inimigo para atirar!<br>
+    <b>Escolha o defensivo certo</b> antes de atirar.<br>
+    Defensivo errado = inimigo não morre! 🚫<br>
+    Se morrer = <b>explicação completa</b> 📚
+  </div>
+  <button class="btn-green" onclick="startGame()">▶ INICIAR</button>
+</div>
+
+<!-- ══ GAME OVER ══ -->
+
+<div class="screen" id="gameover">
+  <div class="go-title">💀 GAME OVER</div>
+  <div class="go-enemy" id="go-enemy">🐛</div>
+  <div class="go-killed-by" id="go-killed-by">Derrotado por...</div>
+  <div class="go-card wrong">
+    <div class="go-card-title">❌ Você usou</div>
+    <div class="go-card-text" id="go-wrong"></div>
+  </div>
+  <div class="go-card right">
+    <div class="go-card-title">✅ Correto seria</div>
+    <div class="go-card-text" id="go-right"></div>
+  </div>
+  <div class="go-stats">
+    <div class="go-stat"><div class="go-stat-v" style="color:#f9c74f" id="go-pts">0</div><div class="go-stat-l">Pontos</div></div>
+    <div class="go-stat"><div class="go-stat-v" style="color:#22c55e" id="go-kills">0</div><div class="go-stat-l">Abates</div></div>
+    <div class="go-stat"><div class="go-stat-v" style="color:#4361ee" id="go-wave">1</div><div class="go-stat-l">Wave</div></div>
+  </div>
+  <button class="btn-retry" onclick="startGame()">↺ TENTAR DE NOVO</button>
+  <button class="btn-menu" onclick="showScreen('home')">Menu</button>
+</div>
+
+<script>
+// ════════════════════════════
+//  DADOS
+// ════════════════════════════
+const ENEMIES_DATA = [
+  {
+    id:'lagarta', name:'Lagarta-do-Cartucho', icon:'🐛',
+    color:'#f3722c', hp:2, speed:0.6, pts:100,
+    correct:['diamida','organofosforado','bt'],
+    wrongMsg:(ammo)=>{
+      if(ammo.type==='Fungicida') return `<b>Fungicida não age em inseto!</b> Lagarta é um inseto (lepidóptero) — fungicida destrói membrana fúngica, não tem efeito sobre sistema nervoso ou muscular de insetos.`;
+      if(ammo.type==='Herbicida') return `<b>Herbicida não age em inseto!</b> Herbicidas inibem enzimas de plantas (EPSPS, ALS...) — lagartas não possuem essas enzimas.`;
+      if(ammo.id==='neonicotinoide') return `<b>Neonicotinoide tem baixa eficácia em lagartas!</b> Age nos receptores nAChR, mas lagartas maiores (Spodoptera) têm baixa sensibilidade. Prefira Diamida ou Bt.`;
+      if(ammo.id==='piretroide') return `<b>Piretroide tem eficácia limitada em lagartas grandes!</b> Spodoptera frugiperda tem resistência documentada a piretroides no Brasil. Use Diamida ou organofosforado.`;
+      if(ammo.id==='abamectina') return `<b>Abamectina tem baixo espectro para lagartas!</b> É eficaz para ácaros e algumas pragas menores, mas não é indicada para Spodoptera.`;
+      return `<b>Este defensivo não é indicado para lagartas!</b> Spodoptera frugiperda precisa de Diamida, Organofosforado ou Bt.`;
+    },
+    rightMsg:'<b>Diamida</b> (clorantraniliprole) → ativa receptores de rianodina → paralisia muscular<br><b>Organofosforado</b> (clorpirifós) → inibe AChE → nervo travado ligado<br><b>Bt</b> (Bacillus thuringiensis) → proteínas Cry destroem intestino de lagartas',
+  },
+  {
+    id:'percevejo', name:'Percevejo-Marrom', icon:'🟤',
+    color:'#92400e', hp:2, speed:0.5, pts:120,
+    correct:['neonicotinoide','piretroide'],
+    wrongMsg:(ammo)=>{
+      if(ammo.id==='organofosforado') return `<b>Organofosforado funciona em lagartas, mas percevejo é diferente!</b> Euschistus heros é hemíptero sugador com cutícula espessa — organofosforados têm baixa penetração. Use Neonicotinoide (sistêmico) ou Piretroide.`;
+      if(ammo.id==='diamida') return `<b>Diamida não é indicada para percevejo!</b> Age nos receptores de rianodina musculares — muito eficaz em lagartas, mas percevejos têm menor sensibilidade a este mecanismo.`;
+      if(ammo.id==='bt') return `<b>Bt não funciona em percevejo!</b> As proteínas Cry do Bt são específicas para lepidópteros (lagartas) e alguns dípteros. Percevejos (hemípteros) não têm os receptores intestinais alvos do Bt.`;
+      if(ammo.type==='Fungicida') return `<b>Fungicida não age em inseto!</b> Percevejo é inseto hemíptero — fungicida não tem nenhum efeito sobre seu sistema nervoso.`;
+      if(ammo.type==='Herbicida') return `<b>Herbicida não age em inseto!</b> Percevejos não possuem as enzimas vegetais (EPSPS, ALS) que os herbicidas inibem.`;
+      return `<b>Este defensivo não é indicado para percevejo!</b> Use Neonicotinoide sistêmico ou Piretroide de contato.`;
+    },
+    rightMsg:'<b>Neonicotinoide</b> (imidacloprido, tiametoxam) → sistêmico → age nos receptores nAChR do nervo<br><b>Piretroide</b> (cipermetrina, deltametrina) → contato → trava canais de Na⁺ → paralisia nervosa',
+  },
+  {
+    id:'ferrugem', name:'Ferrugem Asiática', icon:'🟠',
+    color:'#ea580c', hp:3, speed:0.4, pts:150,
+    correct:['triazol','estrobilurina'],
+    wrongMsg:(ammo)=>{
+      if(ammo.type==='Inseticida') return `<b>Inseticida não mata fungo!</b> Ferrugem é causada por Phakopsora pachyrhizi (fungo). Inseticidas atuam no sistema nervoso/muscular de insetos — fungos não têm esses alvos.`;
+      if(ammo.type==='Herbicida') return `<b>Herbicida não mata fungo!</b> Herbicidas inibem enzimas de plantas (EPSPS, ALS, ACCase) — fungos não têm essas vias metabólicas.`;
+      if(ammo.id==='sdhi') return `<b>SDHI sozinho não é suficiente para ferrugem asiática!</b> Embora seja fungicida, o padrão de mercado para ferrugem é a mistura Triazol + Estrobilurina para duplo mecanismo de ação.`;
+      if(ammo.id==='benzimidazol') return `<b>Benzimidazol tem resistência documentada em ferrugem!</b> Phakopsora pachyrhizi desenvolveu resistência a benzimidazóis no Brasil. Use Triazol + Estrobilurina.`;
+      return `<b>Este defensivo não controla ferrugem asiática!</b> Use mistura de Triazol + Estrobilurina para duplo mecanismo.`;
+    },
+    rightMsg:'<b>Triazol</b> (tebuconazol, epoxiconazol) → inibe 14α-demetilase → sem ergosterol → membrana fúngica se rompe<br><b>Estrobilurina</b> (azoxistrobina, piraclostrobina) → bloqueia Complexo III mitocondrial → sem ATP → fungo morre<br>⚠️ Sempre use a mistura para evitar resistência!',
+  },
+  {
+    id:'buva', name:'Buva (Conyza)', icon:'🌿',
+    color:'#16a34a', hp:2, speed:0.35, pts:130,
+    correct:['glifosato','2_4_d'],
+    wrongMsg:(ammo)=>{
+      if(ammo.type==='Inseticida') return `<b>Inseticida não mata planta daninha!</b> Buva é uma planta dicotiledônea — inseticidas atuam no sistema nervoso/muscular de insetos, não em plantas.`;
+      if(ammo.type==='Fungicida') return `<b>Fungicida não mata planta daninha!</b> Buva é uma planta — fungicidas atacam membranas ou respiração de fungos, sem efeito sobre vegetais.`;
+      if(ammo.id==='ace_case'||ammo.id==='graminicida') return `<b>Inibidor de ACCase não controla buva!</b> Este herbicida é seletivo para gramíneas — inibe síntese de ácidos graxos em monocotiledôneas. Buva é dicotiledônea, não é afetada.`;
+      if(ammo.id==='imazapique'||ammo.id==='als') return `<b>Inibidor de ALS tem eficácia variável em buva!</b> Conyza bonariensis tem populações resistentes a inibidores de ALS no Brasil. Prefira Glyphosate ou 2,4-D.`;
+      return `<b>Este herbicida não é indicado para buva!</b> Use Glyphosate (inibe EPSPS) ou 2,4-D (auxina sintética).`;
+    },
+    rightMsg:'<b>Glyphosate</b> → inibe EPSPS na via chiquimato → sem aminoácidos aromáticos → planta morre em dias<br><b>2,4-D</b> → mimetiza auxina em excesso → crescimento desordenado → morte de dicotiledôneas<br>⚠️ Buva resistente ao glyphosate é comum! Use 2,4-D ou misturas.',
+  },
+  {
+    id:'acaro', name:'Ácaro-Rajado', icon:'🕷️',
+    color:'#dc2626', hp:2, speed:0.7, pts:140,
+    correct:['abamectina'],
+    wrongMsg:(ammo)=>{
+      if(ammo.id==='piretroide') return `<b>NUNCA use piretroide em ácaro!</b> Piretroides eliminam os inimigos naturais do ácaro (predadores) e podem AUMENTAR a população de Tetranychus urticae por hormese. É o erro mais grave!`;
+      if(ammo.id==='neonicotinoide') return `<b>Neonicotinoide não controla ácaro!</b> Age nos receptores nAChR de insetos — ácaros são aracnídeos e não possuem esse alvo. Sem efeito.`;
+      if(ammo.id==='organofosforado'||ammo.id==='diamida') return `<b>Este inseticida tem baixíssima eficácia em ácaro!</b> Ácaros são aracnídeos (8 patas), não insetos. A maioria dos inseticidas não tem boa penetração na cutícula dos ácaros.`;
+      if(ammo.type==='Fungicida') return `<b>Fungicida não age em ácaro!</b> Ácaro é aracnídeo — fungicidas não têm nenhum alvo biológico em ácaros.`;
+      if(ammo.type==='Herbicida') return `<b>Herbicida não age em ácaro!</b> Herbicidas inibem enzimas de plantas — ácaros não possuem essas vias.`;
+      return `<b>Ácaro precisa de acaricida específico!</b> Tetranychus urticae é aracnídeo — use Abamectina.`;
+    },
+    rightMsg:'<b>Abamectina</b> (avermectina) → age nos canais de Cl⁻ regulados por glutamato e receptores GABA → paralisia flácida → morte<br>Derivada de Streptomyces avermitilis. Única opção correta aqui!<br>⚠️ Piretroide é CONTRAINDICADO — mata predadores e estimula reprodução do ácaro!',
+  },
+  {
+    id:'oídio', name:'Oídio', icon:'⬜',
+    color:'#d1d5db', hp:2, speed:0.45, pts:130,
+    correct:['triazol','estrobilurina','sdhi'],
+    wrongMsg:(ammo)=>{
+      if(ammo.type==='Inseticida') return `<b>Inseticida não mata fungo!</b> Oídio é causado por fungos da ordem Erysiphales — inseticidas atuam em nervos/músculos de insetos, sem efeito em fungos.`;
+      if(ammo.type==='Herbicida') return `<b>Herbicida não mata fungo!</b> Oídio é um fungo — herbicidas inibem enzimas exclusivas de plantas.`;
+      if(ammo.id==='benzimidazol') return `<b>Benzimidazol tem resistência em oídio!</b> Muitas populações de Erysiphales desenvolveram resistência à β-tubulina. Use Triazol, Estrobilurina ou SDHI.`;
+      return `<b>Este defensivo não controla oídio!</b> Use fungicida: Triazol (IDM), Estrobilurina (IQo) ou SDHI.`;
+    },
+    rightMsg:'<b>Triazol</b> → inibe CYP51 (síntese de ergosterol) → membrana fúngica frágil<br><b>Estrobilurina</b> → bloqueia Complexo III → sem ATP<br><b>SDHI</b> (boscalida) → bloqueia Complexo II mitocondrial → sem energia<br>Alterne grupos para evitar resistência!',
+  },
+  {
+    id:'capim', name:'Capim-Amargo', icon:'🌾',
+    color:'#65a30d', hp:2, speed:0.4, pts:120,
+    correct:['ace_case','graminicida'],
+    wrongMsg:(ammo)=>{
+      if(ammo.type==='Inseticida') return `<b>Inseticida não mata planta daninha!</b> Capim-amargo é uma gramínea — inseticidas atuam em insetos, não em plantas.`;
+      if(ammo.type==='Fungicida') return `<b>Fungicida não mata planta daninha!</b> Capim é planta, não fungo.`;
+      if(ammo.id==='glifosato') return `<b>Glyphosate tem resistência em capim-amargo!</b> Digitaria insularis tem populações altamente resistentes ao glyphosate no Brasil. Use inibidor de ACCase (cletodim).`;
+      if(ammo.id==='2_4_d') return `<b>2,4-D não controla gramíneas!</b> É seletivo para dicotiledôneas (folha larga). Capim-amargo é gramínea monocotiledônea — não possui os receptores de auxina que o 2,4-D explora.`;
+      if(ammo.id==='imazapique'||ammo.id==='als') return `<b>Inibidor de ALS tem eficácia variável em capim-amargo!</b> Há populações resistentes. O padrão é inibidor de ACCase (cletodim, haloxifope).`;
+      return `<b>Este herbicida não controla gramíneas!</b> Use inibidor de ACCase — específico para gramíneas.`;
+    },
+    rightMsg:'<b>Inibidor de ACCase</b> (cletodim, haloxifope, fluazifope) → bloqueia acetil-CoA carboxilase → sem ácidos graxos → gramínea morre<br>Seletivo: age em gramíneas, não afeta dicotiledôneas<br>⚠️ Glyphosate tem resistência em Digitaria insularis!',
+  },
+  {
+    id:'mosca', name:'Mosca-Branca', icon:'🪰',
+    color:'#fbbf24', hp:1, speed:0.8, pts:110,
+    correct:['neonicotinoide','piretroide'],
+    wrongMsg:(ammo)=>{
+      if(ammo.id==='organofosforado') return `<b>Organofosforado tem resistência em mosca-branca!</b> Bemisia tabaci desenvolveu resistência a organofosforados em muitas regiões. Prefira Neonicotinoide sistêmico.`;
+      if(ammo.id==='diamida'||ammo.id==='bt') return `<b>Este inseticida não é o indicado para mosca-branca!</b> Diamidas são para lagartas; Bt é específico para lepidópteros. Mosca-branca é hemíptero — use Neonicotinoide.`;
+      if(ammo.type==='Fungicida') return `<b>Fungicida não age em inseto!</b> Mosca-branca é inseto hemíptero — fungicidas não têm efeito.`;
+      if(ammo.type==='Herbicida') return `<b>Herbicida não age em inseto!</b> Mosca-branca não possui as enzimas vegetais que os herbicidas inibem.`;
+      return `<b>Este defensivo não controla mosca-branca!</b> Use Neonicotinoide sistêmico (tiametoxam, imidacloprido).`;
+    },
+    rightMsg:'<b>Neonicotinoide</b> (tiametoxam, imidacloprido) → sistêmico → absorvido pela planta → age no nAChR da mosca ao sugar<br><b>Piretroide</b> → contato → trava canais de Na⁺<br>Bemisia tabaci transmite geminivírus — controle é urgente!',
+  },
+];
+
+const AMMOS_DATA = [
+  {id:'neonicotinoide', name:'Neonico.',    icon:'☕', color:'#f97316', type:'Inseticida'},
+  {id:'piretroide',     name:'Piretroide', icon:'⚡', color:'#fbbf24', type:'Inseticida'},
+  {id:'organofosforado',name:'Organofos.', icon:'🔧', color:'#f43f5e', type:'Inseticida'},
+  {id:'diamida',        name:'Diamida',    icon:'💪', color:'#ec4899', type:'Inseticida'},
+  {id:'abamectina',     name:'Abamect.',   icon:'😴', color:'#8b5cf6', type:'Inseticida'},
+  {id:'bt',             name:'Bt Bio',     icon:'🧬', color:'#10b981', type:'Biológico'},
+  {id:'triazol',        name:'Triazol',    icon:'🧱', color:'#a855f7', type:'Fungicida'},
+  {id:'estrobilurina',  name:'Estrobil.',  icon:'🔋', color:'#7c3aed', type:'Fungicida'},
+  {id:'sdhi',           name:'SDHI',       icon:'🔌', color:'#6d28d9', type:'Fungicida'},
+  {id:'glifosato',      name:'Glyphosat.', icon:'🏭', color:'#22c55e', type:'Herbicida'},
+  {id:'2_4_d',          name:'2,4-D',      icon:'📢', color:'#16a34a', type:'Herbicida'},
+  {id:'ace_case',       name:'Inh.ACCase', icon:'🌾', color:'#65a30d', type:'Herbicida'},
+  {id:'graminicida',    name:'Graminic.',  icon:'🔑', color:'#4d7c0f', type:'Herbicida'},
+];
+
+// ════════════════════════════
+//  ESTADO
+// ════════════════════════════
+let enemies = [];
+let score = 0;
+let lives = 3;
+let wave = 1;
+let kills = 0;
+let selectedAmmo = 'neonicotinoide';
+let spawnInterval = null;
+let lastKilledBy = null;
+let lastAmmoUsed = null;
+let gameRunning = false;
+let spawnDelay = 2000;
+
+// ════════════════════════════
+//  TELAS
+// ════════════════════════════
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  const el = document.getElementById(id);
+  if(el) el.classList.add('active');
+  const ingame = (id==='playing');
+  document.getElementById('hud').style.display = ingame?'flex':'none';
+  document.getElementById('ammo-section').style.display = ingame?'block':'none';
+  document.getElementById('crosshair').style.display = ingame?'block':'none';
+}
+
+// ════════════════════════════
+//  MUNIÇÕES
+// ════════════════════════════
+function buildAmmoBar(){
+  const bar = document.getElementById('ammo-bar');
+  bar.innerHTML = '';
+  AMMOS_DATA.forEach(a=>{
+    const btn = document.createElement('div');
+    btn.className = 'ammo-btn' + (a.id===selectedAmmo?' selected':'');
+    btn.dataset.id = a.id;
+    btn.style.borderColor = a.color;
+    btn.style.color = a.color;
+    btn.style.background = a.color+'18';
+    btn.innerHTML = `<div class="ammo-icon">${a.icon}</div><div class="ammo-name">${a.name}</div><div class="ammo-type">${a.type}</div>`;
+    btn.onclick = ()=>selectAmmo(a.id);
+    bar.appendChild(btn);
+  });
+}
+
+function selectAmmo(id){
+  selectedAmmo = id;
+  document.querySelectorAll('.ammo-btn').forEach(b=>{
+    b.classList.toggle('selected', b.dataset.id===id);
+  });
+  const a = AMMOS_DATA.find(am=>am.id===id);
+  if(a) floatNotif(`${a.icon} ${a.name} selecionado`, a.color);
+}
+
+// ════════════════════════════
+//  SPAWN INIMIGOS
+// ════════════════════════════
+function getEnemyPool(){
+  if(wave<=2) return ['lagarta','percevejo','buva'];
+  if(wave<=4) return ['lagarta','percevejo','ferrugem','buva','mosca'];
+  return ENEMIES_DATA.map(e=>e.id);
+}
+
+function spawnEnemy(){
+  if(!gameRunning) return;
+  const pool = getEnemyPool();
+  const eid = pool[Math.floor(Math.random()*pool.length)];
+  const data = ENEMIES_DATA.find(e=>e.id===eid);
+  if(!data) return;
+
+  const el = document.createElement('div');
+  el.className = 'enemy';
+  el.dataset.id = eid;
+
+  const x = 10 + Math.random() * (window.innerWidth - 120);
+  el.style.left = x + 'px';
+  el.style.top = '-80px';
+
+  el.innerHTML = `
+    <div class="enemy-emoji">${data.icon}</div>
+    <div class="enemy-name">${data.name}</div>
+    <div class="enemy-hp-bar">
+      <div class="enemy-hp-fill" style="width:100%;background:${data.color}"></div>
+    </div>`;
+
+  el.dataset.hp = data.hp;
+  el.dataset.maxHp = data.hp;
+  el.dataset.y = -80;
+  el.dataset.speed = data.speed * (1 + wave*0.02);
+
+  el.onclick = (e)=>{ e.stopPropagation(); shoot(el); };
+  el.addEventListener('touchstart', e=>{ e.preventDefault(); e.stopPropagation(); shoot(el); },{passive:false});
+
+  document.body.appendChild(el);
+  enemies.push(el);
+}
+
+// ════════════════════════════
+//  ATIRAR
+// ════════════════════════════
+function shoot(el){
+  if(!gameRunning || !el || el.classList.contains('dying')) return;
+
+  const eid = el.dataset.id;
+  const data = ENEMIES_DATA.find(e=>e.id===eid);
+  const ammo = AMMOS_DATA.find(a=>a.id===selectedAmmo);
+  if(!data||!ammo) return;
+
+  lastAmmoUsed = ammo;
+  lastKilledBy = data;
+
+  const rect = el.getBoundingClientRect();
+  const cx = rect.left + rect.width/2;
+  const cy = rect.top + rect.height/2;
+
+  if(data.correct.includes(selectedAmmo)){
+    // ✅ ACERTO
+    let hp = parseInt(el.dataset.hp) - 1;
+    el.dataset.hp = hp;
+    el.classList.add('hit');
+    setTimeout(()=>el.classList.remove('hit'),150);
+
+    // atualiza barra HP
+    const fill = el.querySelector('.enemy-hp-fill');
+    if(fill) fill.style.width = (hp/parseInt(el.dataset.maxHp)*100)+'%';
+
+    spawnParticles(cx, cy, '💥', ammo.color);
+
+    if(hp<=0){
+      // morreu!
+      el.classList.add('dying');
+      kills++;
+      const pts = data.pts + wave*10;
+      score += pts;
+      floatNotif(`+${pts} ☠️ ${data.name} eliminada!`, '#f9c74f', cy);
+      flashGood();
+      setTimeout(()=>removeEnemy(el), 400);
+    } else {
+      floatNotif(`💥 ${ammo.name} funcionou! HP: ${hp}`, ammo.color, cy);
+      flashGood();
+    }
+  } else {
+    // ❌ ERRO — perde vida ao aplicar errado!
+    spawnParticles(cx, cy, '🚫', '#ef4444');
+    flashHit();
+    lives--;
+    updateHUD();
+    const wrongMsg = typeof data.wrongMsg==='function'?data.wrongMsg(ammo):data.wrongMsg;
+    floatNotif(`❌ ${ammo.name} ERRADO p/ ${data.name}! -1 vida`, '#ef4444', cy);
+    lastAmmoUsed = ammo;
+    lastKilledBy = data;
+    if(lives<=0){
+      setTimeout(()=>triggerGameOver(),800);
+    }
+  }
+  updateHUD();
+}
+
+// ════════════════════════════
+//  UPDATE LOOP
+// ════════════════════════════
+function update(){
+  if(!gameRunning) return;
+
+  enemies.forEach((el,i)=>{
+    if(!el.parentNode) return;
+    if(el.classList.contains('dying')) return;
+
+    let y = parseFloat(el.dataset.y) + parseFloat(el.dataset.speed);
+    el.dataset.y = y;
+    el.style.top = y + 'px';
+
+    if(y > window.innerHeight){
+      // inimigo passou → só remove, não perde vida
+      removeEnemy(el);
+    }
+  });
+
+  // wave: aumenta dificuldade por kills
+  if(kills > 0 && kills % 8 === 0){
+    wave = Math.floor(kills/8) + 1;
+    spawnDelay = Math.max(600, 2000 - wave*150);
+    updateHUD();
+  }
+
+  requestAnimationFrame(update);
+}
+
+function removeEnemy(el){
+  const i = enemies.indexOf(el);
+  if(i>-1) enemies.splice(i,1);
+  if(el.parentNode) el.remove();
+}
+
+// ════════════════════════════
+//  VIDAS
+// ════════════════════════════
+function loseLife(data){
+  lives--;
+  flashHit();
+  updateHUD();
+  if(data) floatNotif(`💔 ${data.name} passou! -1 vida`, '#ef4444');
+  if(lives<=0) triggerGameOver();
+}
+
+function triggerGameOver(){
+  gameRunning = false;
+  clearInterval(spawnInterval);
+
+  const data = lastKilledBy || ENEMIES_DATA[0];
+  const ammo = lastAmmoUsed || AMMOS_DATA[0];
+  const correctAmmosText = data.correct.map(aid=>{
+    const a = AMMOS_DATA.find(am=>am.id===aid);
+    return a?`${a.icon} ${a.name}`:aid;
+  }).join(', ');
+
+  document.getElementById('go-enemy').textContent = data.icon;
+  document.getElementById('go-killed-by').textContent = `Derrotado por: ${data.name}`;
+  document.getElementById('go-wrong').innerHTML =
+    `Você usou <b>${ammo.icon} ${ammo.name}</b> (${ammo.type})<br><br>${typeof data.wrongMsg==='function'?data.wrongMsg(ammo):data.wrongMsg}`;
+  document.getElementById('go-right').innerHTML =
+    `Corretos: <b>${correctAmmosText}</b><br><br>${data.rightMsg}`;
+  document.getElementById('go-pts').textContent = score;
+  document.getElementById('go-kills').textContent = kills;
+  document.getElementById('go-wave').textContent = wave;
+
+  // limpa inimigos
+  enemies.forEach(e=>{if(e.parentNode)e.remove();});
+  enemies=[];
+
+  showScreen('gameover');
+}
+
+// ════════════════════════════
+//  HUD
+// ════════════════════════════
+function updateHUD(){
+  document.getElementById('score-display').textContent = `⭐ ${score}`;
+  document.getElementById('wave-display').textContent = `WAVE ${wave}`;
+  document.getElementById('lives-display').textContent =
+    '❤️'.repeat(Math.max(0,lives))+'🖤'.repeat(Math.max(0,3-lives));
+}
+
+// ════════════════════════════
+//  EFEITOS VISUAIS
+// ════════════════════════════
+function flashHit(){
+  const el=document.getElementById('hit-flash');
+  el.classList.remove('show');void el.offsetWidth;el.classList.add('show');
+}
+function flashGood(){
+  const el=document.getElementById('good-flash');
+  el.classList.remove('show');void el.offsetWidth;el.classList.add('show');
+}
+
+function spawnParticles(x,y,emoji,color){
+  for(let i=0;i<5;i++){
+    const p=document.createElement('div');
+    p.className='particle';
+    p.textContent=emoji;
+    p.style.left=x+'px';p.style.top=y+'px';
+    p.style.setProperty('--dx',(Math.random()-0.5)*80+'px');
+    p.style.setProperty('--dy',(Math.random()-1)*60+'px');
+    p.style.color=color;
+    document.body.appendChild(p);
+    setTimeout(()=>p.remove(),600);
+  }
+}
+
+function floatNotif(msg, color='#fff', y=null){
+  const el=document.createElement('div');
+  el.className='float-notif';
+  el.textContent=msg;el.style.color=color;
+  if(y) el.style.top=Math.min(y,window.innerHeight*.7)+'px';
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(),800);
+}
+
+// ════════════════════════════
+//  INICIAR
+// ════════════════════════════
+function startGame(){
+  score=0;lives=3;kills=0;wave=1;spawnDelay=2000;
+  lastKilledBy=null;lastAmmoUsed=null;
+  enemies.forEach(e=>{if(e.parentNode)e.remove();});
+  enemies=[];
+  gameRunning=true;
+  buildAmmoBar();
+  updateHUD();
+  showScreen('playing');
+  clearInterval(spawnInterval);
+  spawnInterval=setInterval(()=>{
+    spawnEnemy();
+    clearInterval(spawnInterval);
+    spawnInterval=setInterval(spawnEnemy, spawnDelay);
+  },300);
+  requestAnimationFrame(update);
+}
+
+// Init
+showScreen('home');
+</script>
+
+</body>
+</html>
