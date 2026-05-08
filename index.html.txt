@@ -1,0 +1,1098 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>AgroMaster Pro 🌾</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@700;900&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+:root{
+  --green:#1a5c2e;--green2:#2d8a4e;--lime:#7ec94a;
+  --gold:#e8b84b;--cream:#f5f0e8;--dark:#0d1f0f;
+  --text:#1a2e1c;--text2:#4a6b4e;--red:#ef4444;
+  --radius:16px;
+}
+html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);overflow-x:hidden;}
+
+/* ── SCREENS ── */
+.screen{display:none;min-height:100vh;flex-direction:column;}
+.screen.active{display:flex;}
+
+/* ── INPUTS ── */
+.input-group{display:flex;flex-direction:column;gap:6px;width:100%;}
+.input-label{font-size:13px;font-weight:600;color:var(–text2);}
+.input-field{
+padding:13px 16px;border-radius:12px;
+border:2px solid #d4cfc5;background:#fff;
+font-size:15px;font-family:‘DM Sans’,sans-serif;
+transition:border-color .2s;outline:none;width:100%;
+}
+.input-field:focus{border-color:var(–lime);}
+.input-error{font-size:12px;color:var(–red);display:none;}
+.input-error.show{display:block;}
+
+/* ── BUTTONS ── */
+.btn-primary{
+width:100%;padding:15px;border:none;border-radius:99px;
+background:linear-gradient(135deg,var(–lime),var(–green2));
+color:var(–dark);font-size:16px;font-weight:700;
+cursor:pointer;transition:transform .15s,box-shadow .15s;
+font-family:‘DM Sans’,sans-serif;
+}
+.btn-primary:active{transform:scale(.97);}
+.btn-primary:disabled{opacity:.5;cursor:default;}
+.btn-secondary{
+width:100%;padding:13px;border:2px solid #d4cfc5;border-radius:99px;
+background:none;color:var(–text2);font-size:15px;font-weight:600;
+cursor:pointer;font-family:‘DM Sans’,sans-serif;transition:all .15s;
+}
+.btn-secondary:active{transform:scale(.97);}
+
+/* ── ALERTS ── */
+.alert{
+padding:12px 16px;border-radius:12px;font-size:14px;
+margin-bottom:12px;display:none;
+}
+.alert.show{display:block;}
+.alert.success{background:#f0fdf4;border:1px solid #86efac;color:#166534;}
+.alert.error{background:#fef2f2;border:1px solid #fca5a5;color:#991b1b;}
+.alert.info{background:#eff6ff;border:1px solid #93c5fd;color:#1e40af;}
+
+/* ══════════════════════════
+HOME / LANDING
+══════════════════════════ */
+#home{background:var(–dark);align-items:center;justify-content:center;padding:40px 24px;text-align:center;gap:24px;position:relative;overflow:hidden;}
+#home::before{content:’’;position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 110%,#1a5c2e55,transparent);}
+.home-content{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:20px;max-width:420px;}
+.home-logo{font-family:‘Fraunces’,serif;font-size:52px;font-weight:900;color:var(–lime);line-height:1;}
+.home-logo span{color:var(–gold);font-size:32px;display:block;font-weight:700;}
+.home-desc{font-size:16px;color:#ffffffaa;line-height:1.7;max-width:340px;}
+.home-desc b{color:var(–gold);}
+.home-price{
+background:#ffffff10;border:1px solid #ffffff22;
+border-radius:var(–radius);padding:20px 28px;width:100%;
+}
+.home-price-val{font-family:‘Fraunces’,serif;font-size:48px;font-weight:900;color:var(–lime);}
+.home-price-val span{font-size:20px;}
+.home-price-period{font-size:13px;color:#ffffff66;margin-top:4px;}
+.home-features{text-align:left;display:flex;flex-direction:column;gap:8px;width:100%;}
+.home-feature{display:flex;align-items:center;gap:10px;font-size:14px;color:#ffffffcc;}
+.home-feature::before{content:‘✓’;width:20px;height:20px;border-radius:50%;background:var(–green2);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;}
+.home-links{display:flex;gap:12px;width:100%;}
+.home-links .btn-primary{flex:2;}
+.home-links .btn-secondary{flex:1;border-color:#ffffff33;color:#ffffffaa;}
+.home-guarantee{font-size:12px;color:#ffffff44;}
+
+/* ══════════════════════════
+CADASTRO / LOGIN
+══════════════════════════ */
+#cadastro,#login,#pagamento{
+align-items:center;justify-content:flex-start;
+padding:0;background:var(–cream);
+}
+.form-header{
+width:100%;background:var(–dark);padding:20px 24px 24px;
+display:flex;align-items:center;gap:14px;
+}
+.form-header-back{
+background:#ffffff15;border:none;border-radius:50%;
+width:36px;height:36px;color:#fff;font-size:18px;
+cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.form-header-title{font-family:‘Fraunces’,serif;font-size:22px;font-weight:900;color:#fff;}
+.form-header-sub{font-size:13px;color:#ffffff66;margin-top:2px;}
+.form-body{
+width:100%;max-width:480px;margin:0 auto;
+padding:24px 20px 40px;
+display:flex;flex-direction:column;gap:16px;
+}
+
+/* Progress steps */
+.steps{display:flex;gap:8px;align-items:center;margin-bottom:8px;}
+.step{
+height:4px;border-radius:99px;flex:1;
+background:#d4cfc5;transition:background .3s;
+}
+.step.done{background:var(–lime);}
+.step.active{background:var(–green2);}
+
+/* ══════════════════════════
+PAGAMENTO
+══════════════════════════ */
+.pay-methods{display:flex;gap:10px;margin-bottom:8px;}
+.pay-tab{
+flex:1;padding:12px;border-radius:12px;
+border:2px solid #d4cfc5;background:#fff;
+font-size:14px;font-weight:700;cursor:pointer;
+text-align:center;transition:all .2s;color:var(–text2);
+}
+.pay-tab.active{border-color:var(–lime);background:#f0fdf4;color:var(–green);}
+
+.pix-box{
+background:#fff;border:2px solid #d4cfc5;border-radius:var(–radius);
+padding:24px;text-align:center;
+}
+.pix-key-label{font-size:12px;color:var(–text2);margin-bottom:8px;}
+.pix-key{
+font-size:18px;font-weight:700;color:var(–green);
+background:#f0fdf4;border:2px dashed var(–lime);
+border-radius:12px;padding:14px;margin-bottom:12px;
+word-break:break-all;cursor:pointer;
+}
+.pix-copy-btn{
+background:var(–lime);color:var(–dark);border:none;
+border-radius:99px;padding:10px 24px;font-weight:700;
+font-size:14px;cursor:pointer;transition:transform .15s;
+}
+.pix-copy-btn:active{transform:scale(.95);}
+.pix-info{font-size:12px;color:var(–text2);margin-top:12px;line-height:1.6;}
+
+.card-form{display:flex;flex-direction:column;gap:12px;}
+.card-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+
+.mp-btn{
+width:100%;padding:15px;border:none;border-radius:99px;
+background:linear-gradient(135deg,#009ee3,#0077b6);
+color:#fff;font-size:16px;font-weight:700;
+cursor:pointer;font-family:‘DM Sans’,sans-serif;
+display:flex;align-items:center;justify-content:center;gap:8px;
+}
+
+/* Comprovante */
+.comprovante-box{
+background:#fff;border:2px solid #d4cfc5;border-radius:var(–radius);
+padding:20px;
+}
+.comprovante-title{font-weight:700;font-size:15px;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+.comp-input{
+width:100%;border:2px solid #d4cfc5;border-radius:12px;
+padding:12px;font-size:14px;font-family:‘DM Sans’,sans-serif;
+resize:none;outline:none;min-height:80px;
+}
+.comp-input:focus{border-color:var(–lime);}
+
+/* ══════════════════════════
+AGUARDANDO APROVAÇÃO
+══════════════════════════ */
+#aguardando{
+align-items:center;justify-content:center;
+background:var(–cream);padding:40px 24px;text-align:center;gap:20px;
+}
+.aguard-icon{font-size:64px;animation:pulse 2s ease-in-out infinite;}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+.aguard-title{font-family:‘Fraunces’,serif;font-size:28px;font-weight:900;color:var(–text);}
+.aguard-sub{font-size:15px;color:var(–text2);max-width:320px;line-height:1.7;}
+.aguard-steps{
+background:#fff;border-radius:var(–radius);
+border:1.5px solid #d4cfc5;padding:20px;
+width:100%;max-width:380px;display:flex;flex-direction:column;gap:14px;
+}
+.aguard-step{display:flex;align-items:flex-start;gap:12px;font-size:14px;color:var(–text2);line-height:1.5;}
+.aguard-step-num{
+width:28px;height:28px;border-radius:50%;
+background:var(–lime);color:var(–dark);
+display:flex;align-items:center;justify-content:center;
+font-weight:700;font-size:13px;flex-shrink:0;
+}
+.whatsapp-btn{
+background:#25D366;color:#fff;border:none;border-radius:99px;
+padding:15px 32px;font-size:16px;font-weight:700;
+cursor:pointer;display:flex;align-items:center;gap:10px;
+font-family:‘DM Sans’,sans-serif;transition:transform .15s;
+}
+.whatsapp-btn:active{transform:scale(.97);}
+
+/* ══════════════════════════
+ÁREA DO ALUNO
+══════════════════════════ */
+#area-aluno{background:var(–cream);}
+.aluno-header{
+background:var(–dark);padding:20px 20px 24px;
+display:flex;justify-content:space-between;align-items:center;
+}
+.aluno-hello{font-size:13px;color:#ffffff88;}
+.aluno-name{font-family:‘Fraunces’,serif;font-size:22px;font-weight:900;color:var(–lime);}
+.aluno-logout{
+background:#ffffff15;border:none;border-radius:99px;
+padding:8px 16px;color:#ffffffaa;font-size:13px;
+cursor:pointer;font-family:‘DM Sans’,sans-serif;
+}
+.aluno-body{padding:20px;display:flex;flex-direction:column;gap:16px;max-width:600px;margin:0 auto;width:100%;}
+
+.modulo-card{
+background:#fff;border-radius:var(–radius);
+border:1.5px solid #e0d8cc;overflow:hidden;
+transition:transform .2s,box-shadow .2s;
+}
+.modulo-card:hover{transform:translateY(-3px);box-shadow:0 8px 30px #0d1f0f15;}
+.modulo-header{
+padding:18px 20px;display:flex;align-items:center;
+gap:14px;cursor:pointer;
+}
+.modulo-icon{
+width:48px;height:48px;border-radius:14px;
+display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;
+}
+.modulo-info{flex:1;}
+.modulo-name{font-weight:700;font-size:16px;color:var(–text);}
+.modulo-desc{font-size:12px;color:var(–text2);margin-top:2px;}
+.modulo-arrow{font-size:18px;color:var(–text2);transition:transform .3s;}
+.modulo-card.open .modulo-arrow{transform:rotate(90deg);}
+.modulo-content{
+max-height:0;overflow:hidden;
+transition:max-height .4s ease;
+border-top:0 solid #e0d8cc;
+}
+.modulo-card.open .modulo-content{max-height:500px;border-top-width:1.5px;}
+.aula-list{padding:12px 16px;display:flex;flex-direction:column;gap:8px;}
+.aula-item{
+display:flex;align-items:center;gap:12px;
+padding:12px 14px;border-radius:12px;
+background:var(–cream);cursor:pointer;
+transition:all .2s;text-decoration:none;color:var(–text);
+}
+.aula-item:active{transform:scale(.98);}
+.aula-item:hover{background:#e8e0d4;}
+.aula-icon{font-size:20px;flex-shrink:0;}
+.aula-name{font-size:14px;font-weight:600;flex:1;}
+.aula-tag{
+font-size:10px;font-weight:700;padding:3px 8px;
+border-radius:99px;letter-spacing:1px;
+text-transform:uppercase;
+}
+
+/* Assinatura status */
+.assinatura-box{
+background:linear-gradient(135deg,var(–dark),var(–green));
+border-radius:var(–radius);padding:20px;
+display:flex;align-items:center;justify-content:space-between;gap:12px;
+}
+.ass-info{}
+.ass-status{font-size:11px;color:#ffffff88;letter-spacing:2px;text-transform:uppercase;}
+.ass-val{font-family:‘Fraunces’,serif;font-size:22px;font-weight:900;color:var(–lime);}
+.ass-period{font-size:12px;color:#ffffff66;}
+.ass-badge{
+background:var(–lime);color:var(–dark);
+border-radius:99px;padding:6px 14px;
+font-size:12px;font-weight:700;white-space:nowrap;
+}
+
+/* ══════════════════════════
+ADMIN
+══════════════════════════ */
+#admin{background:var(–cream);}
+.admin-header{
+background:var(–dark);padding:20px;
+display:flex;justify-content:space-between;align-items:center;
+}
+.admin-title{font-family:‘Fraunces’,serif;font-size:20px;font-weight:900;color:var(–gold);}
+.admin-body{padding:20px;max-width:600px;margin:0 auto;width:100%;display:flex;flex-direction:column;gap:16px;}
+.admin-stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.admin-stat{
+background:#fff;border-radius:var(–radius);
+border:1.5px solid #e0d8cc;padding:16px;text-align:center;
+}
+.admin-stat-val{font-family:‘Fraunces’,serif;font-size:32px;font-weight:900;color:var(–green);}
+.admin-stat-lbl{font-size:12px;color:var(–text2);text-transform:uppercase;letter-spacing:1px;}
+
+.aluno-list{background:#fff;border-radius:var(–radius);border:1.5px solid #e0d8cc;overflow:hidden;}
+.aluno-list-header{
+padding:14px 16px;font-weight:700;font-size:14px;
+border-bottom:1.5px solid #e0d8cc;display:flex;justify-content:space-between;align-items:center;
+}
+.aluno-row{
+padding:14px 16px;border-bottom:1px solid #f0ebe0;
+display:flex;align-items:center;gap:12px;
+}
+.aluno-row:last-child{border-bottom:none;}
+.aluno-avatar{
+width:36px;height:36px;border-radius:50%;
+background:var(–lime);display:flex;align-items:center;
+justify-content:center;font-size:16px;flex-shrink:0;
+}
+.aluno-row-info{flex:1;}
+.aluno-row-name{font-weight:600;font-size:14px;}
+.aluno-row-email{font-size:12px;color:var(–text2);}
+.aluno-row-status{font-size:11px;font-weight:700;padding:3px 10px;border-radius:99px;}
+.status-pending{background:#fef9c3;color:#854d0e;}
+.status-active{background:#f0fdf4;color:#166534;}
+.status-blocked{background:#fef2f2;color:#991b1b;}
+.admin-action-btns{display:flex;gap:6px;}
+.admin-btn{
+padding:6px 12px;border-radius:8px;border:none;
+font-size:12px;font-weight:700;cursor:pointer;
+font-family:‘DM Sans’,sans-serif;transition:transform .15s;
+}
+.admin-btn:active{transform:scale(.95);}
+.btn-approve{background:#f0fdf4;color:#166534;border:1px solid #86efac;}
+.btn-block{background:#fef2f2;color:#991b1b;border:1px solid #fca5a5;}
+.btn-delete{background:#fff;color:var(–text2);border:1px solid #d4cfc5;}
+
+.admin-pix-info{
+background:#fff;border-radius:var(–radius);
+border:1.5px solid #e0d8cc;padding:20px;
+}
+.admin-pix-title{font-weight:700;font-size:15px;margin-bottom:12px;color:var(–text);}
+.pix-config{display:flex;flex-direction:column;gap:10px;}
+
+/* NOTIF */
+#toast{
+position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+background:#0d1f0f;color:#fff;border-radius:12px;
+padding:12px 20px;font-size:14px;font-weight:600;
+z-index:999;display:none;white-space:nowrap;
+box-shadow:0 8px 30px #0d1f0f44;
+}
+#toast.show{display:block;animation:toastAnim .3s ease;}
+@keyframes toastAnim{from{opacity:0;transform:translate(-50%,10px)}to{opacity:1;transform:translate(-50%,0)}}
+</style>
+
+</head>
+<body>
+
+<!-- TOAST -->
+
+<div id="toast"></div>
+
+<!-- ══════════════════════════
+     HOME
+══════════════════════════ -->
+
+<div class="screen active" id="home">
+  <div class="home-content">
+    <div>
+      <div class="home-logo">AgroMaster<span>PRO 🌾</span></div>
+    </div>
+    <p class="home-desc">A plataforma que transforma o conteúdo mais difícil da agronomia em <b>jogos, flashcards e quizzes</b> — feita por quem vive o agro na prática.</p>
+    <div class="home-price">
+      <div class="home-price-val"><span>R$</span>19<span>,90</span></div>
+      <div class="home-price-period">por mês • cancele quando quiser</div>
+    </div>
+    <div class="home-features">
+      <div class="home-feature">5 jogos educativos completos</div>
+      <div class="home-feature">200+ questões com explicações</div>
+      <div class="home-feature">Flashcards, quiz e mapa mental</div>
+      <div class="home-feature">Funciona 100% no celular</div>
+      <div class="home-feature">Atualizações mensais de conteúdo</div>
+    </div>
+    <div class="home-links">
+      <button class="btn-primary" onclick="showScreen('cadastro')">Quero assinar →</button>
+      <button class="btn-secondary" onclick="showScreen('login')">Entrar</button>
+    </div>
+    <div class="home-guarantee">🛡️ Garantia de 7 dias — devolvemos tudo sem perguntas</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════
+     CADASTRO
+══════════════════════════ -->
+
+<div class="screen" id="cadastro">
+  <div class="form-header">
+    <button class="form-header-back" onclick="showScreen('home')">←</button>
+    <div>
+      <div class="form-header-title">Criar conta</div>
+      <div class="form-header-sub">Passo 1 de 3 — Seus dados</div>
+    </div>
+  </div>
+  <div class="form-body">
+    <div class="steps">
+      <div class="step active"></div>
+      <div class="step"></div>
+      <div class="step"></div>
+    </div>
+    <div class="alert" id="cad-alert"></div>
+    <div class="input-group">
+      <div class="input-label">Nome completo</div>
+      <input class="input-field" id="cad-nome" type="text" placeholder="Seu nome completo">
+      <div class="input-error" id="err-nome">Digite seu nome completo</div>
+    </div>
+    <div class="input-group">
+      <div class="input-label">Email</div>
+      <input class="input-field" id="cad-email" type="email" placeholder="seu@email.com">
+      <div class="input-error" id="err-email">Digite um email válido</div>
+    </div>
+    <div class="input-group">
+      <div class="input-label">WhatsApp</div>
+      <input class="input-field" id="cad-whats" type="tel" placeholder="(11) 99999-9999">
+      <div class="input-error" id="err-whats">Digite seu WhatsApp</div>
+    </div>
+    <div class="input-group">
+      <div class="input-label">Senha</div>
+      <input class="input-field" id="cad-senha" type="password" placeholder="Mínimo 6 caracteres">
+      <div class="input-error" id="err-senha">Senha deve ter pelo menos 6 caracteres</div>
+    </div>
+    <div class="input-group">
+      <div class="input-label">Confirmar senha</div>
+      <input class="input-field" id="cad-senha2" type="password" placeholder="Repita a senha">
+      <div class="input-error" id="err-senha2">As senhas não conferem</div>
+    </div>
+    <button class="btn-primary" onclick="cadastrar()">Continuar →</button>
+    <button class="btn-secondary" onclick="showScreen('login')">Já tenho conta</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════
+     PAGAMENTO
+══════════════════════════ -->
+
+<div class="screen" id="pagamento">
+  <div class="form-header">
+    <button class="form-header-back" onclick="showScreen('cadastro')">←</button>
+    <div>
+      <div class="form-header-title">Pagamento</div>
+      <div class="form-header-sub">Passo 2 de 3 — Escolha a forma</div>
+    </div>
+  </div>
+  <div class="form-body">
+    <div class="steps">
+      <div class="step done"></div>
+      <div class="step active"></div>
+      <div class="step"></div>
+    </div>
+
+```
+<div class="pay-methods">
+  <div class="pay-tab active" id="tab-pix" onclick="selectPayTab('pix')">💚 PIX</div>
+  <div class="pay-tab" id="tab-card" onclick="selectPayTab('card')">💳 Cartão</div>
+</div>
+
+<!-- PIX -->
+<div id="pay-pix">
+  <div class="pix-box">
+    <div class="pix-key-label">Chave PIX (clique para copiar)</div>
+    <div class="pix-key" id="pix-key-display" onclick="copyPix()">SEU_PIX_AQUI</div>
+    <button class="pix-copy-btn" onclick="copyPix()">📋 Copiar chave PIX</button>
+    <div class="pix-info">
+      💰 Valor: <b>R$19,90/mês</b><br>
+      ⏰ Após o pagamento, envie o comprovante abaixo<br>
+      ✅ Acesso liberado em até 2 horas
+    </div>
+  </div>
+  <div style="height:12px"></div>
+  <div class="comprovante-box">
+    <div class="comprovante-title">📎 Enviar comprovante</div>
+    <textarea class="comp-input" id="comp-texto" placeholder="Cole aqui o ID da transação ou descreva o pagamento (ex: 'Paguei R$19,90 às 14h30 do dia 05/05')"></textarea>
+    <div style="height:10px"></div>
+    <button class="btn-primary" onclick="enviarComprovante()">Enviar comprovante →</button>
+  </div>
+</div>
+
+<!-- CARTÃO -->
+<div id="pay-card" style="display:none">
+  <div class="alert info show">
+    💳 O pagamento por cartão é processado pelo <b>Mercado Pago</b> com segurança total. Taxa de 4,99% sobre o valor.
+  </div>
+  <div class="card-form">
+    <div class="input-group">
+      <div class="input-label">Número do cartão</div>
+      <input class="input-field" type="text" placeholder="0000 0000 0000 0000" maxlength="19" oninput="formatCard(this)">
+    </div>
+    <div class="card-row">
+      <div class="input-group">
+        <div class="input-label">Validade</div>
+        <input class="input-field" type="text" placeholder="MM/AA" maxlength="5">
+      </div>
+      <div class="input-group">
+        <div class="input-label">CVV</div>
+        <input class="input-field" type="text" placeholder="123" maxlength="4">
+      </div>
+    </div>
+    <div class="input-group">
+      <div class="input-label">Nome no cartão</div>
+      <input class="input-field" type="text" placeholder="Como está no cartão">
+    </div>
+    <div class="input-group">
+      <div class="input-label">CPF do titular</div>
+      <input class="input-field" type="text" placeholder="000.000.000-00" maxlength="14">
+    </div>
+    <button class="mp-btn" onclick="pagarCartao()">
+      🔒 Pagar R$19,90 com segurança
+    </button>
+    <div style="font-size:12px;color:var(--text2);text-align:center;">
+      🛡️ Pagamento seguro via Mercado Pago
+    </div>
+  </div>
+</div>
+```
+
+  </div>
+</div>
+
+<!-- ══════════════════════════
+     AGUARDANDO APROVAÇÃO
+══════════════════════════ -->
+
+<div class="screen" id="aguardando">
+  <div class="aguard-icon">⏳</div>
+  <div class="aguard-title">Comprovante enviado!</div>
+  <div class="aguard-sub">Seu acesso será liberado em breve. Você receberá uma mensagem no WhatsApp quando estiver pronto!</div>
+  <div class="aguard-steps">
+    <div class="aguard-step">
+      <div class="aguard-step-num">1</div>
+      <div>Comprovante recebido — obrigada! ✅</div>
+    </div>
+    <div class="aguard-step">
+      <div class="aguard-step-num">2</div>
+      <div>Estamos verificando seu pagamento (até 2h)</div>
+    </div>
+    <div class="aguard-step">
+      <div class="aguard-step-num">3</div>
+      <div>Acesso liberado via WhatsApp 🎉</div>
+    </div>
+  </div>
+  <button class="whatsapp-btn" onclick="abrirWhatsApp()">
+    <span>📱</span> Falar no WhatsApp
+  </button>
+  <button class="btn-secondary" style="max-width:320px" onclick="showScreen('login')">Já liberaram meu acesso →</button>
+</div>
+
+<!-- ══════════════════════════
+     LOGIN
+══════════════════════════ -->
+
+<div class="screen" id="login">
+  <div class="form-header">
+    <button class="form-header-back" onclick="showScreen('home')">←</button>
+    <div>
+      <div class="form-header-title">Entrar</div>
+      <div class="form-header-sub">Acesse sua conta AgroMaster</div>
+    </div>
+  </div>
+  <div class="form-body">
+    <div class="alert" id="login-alert"></div>
+    <div class="input-group">
+      <div class="input-label">Email</div>
+      <input class="input-field" id="login-email" type="email" placeholder="seu@email.com">
+    </div>
+    <div class="input-group">
+      <div class="input-label">Senha</div>
+      <input class="input-field" id="login-senha" type="password" placeholder="Sua senha">
+    </div>
+    <button class="btn-primary" onclick="login()">Entrar →</button>
+    <button class="btn-secondary" onclick="showScreen('cadastro')">Criar conta</button>
+    <div style="text-align:center;font-size:13px;color:var(--text2)">
+      Esqueceu a senha? <span style="color:var(--green);cursor:pointer;font-weight:600" onclick="recuperarSenha()">Clique aqui</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════
+     ÁREA DO ALUNO
+══════════════════════════ -->
+
+<div class="screen" id="area-aluno">
+  <div class="aluno-header">
+    <div>
+      <div class="aluno-hello">Bem-vinda de volta! 🌾</div>
+      <div class="aluno-name" id="aluno-nome-display">Carregando...</div>
+    </div>
+    <button class="aluno-logout" onclick="logout()">Sair</button>
+  </div>
+  <div class="aluno-body">
+
+```
+<div class="assinatura-box">
+  <div class="ass-info">
+    <div class="ass-status">Assinatura</div>
+    <div class="ass-val">R$19,90<span style="font-size:14px;color:#ffffff88">/mês</span></div>
+    <div class="ass-period" id="ass-periodo">Ativa</div>
+  </div>
+  <div class="ass-badge">✅ Ativa</div>
+</div>
+
+<!-- MÓDULOS -->
+<div class="modulo-card" onclick="toggleModulo(this)">
+  <div class="modulo-header">
+    <div class="modulo-icon" style="background:#f9731618">🐛</div>
+    <div class="modulo-info">
+      <div class="modulo-name">Defensivos & Pragas</div>
+      <div class="modulo-desc">Grupos químicos, mecanismos de ação, PAs</div>
+    </div>
+    <div class="modulo-arrow">›</div>
+  </div>
+  <div class="modulo-content">
+    <div class="aula-list">
+      <a class="aula-item" href="agrotrigger-v2.html" target="_blank">
+        <div class="aula-icon">🎯</div>
+        <div class="aula-name">AgroTrigger — Jogo de Tiro</div>
+        <span class="aula-tag" style="background:#f9731618;color:#f97316">JOGO</span>
+      </a>
+      <a class="aula-item" href="mapa-mental-defensivos.html" target="_blank">
+        <div class="aula-icon">🗺️</div>
+        <div class="aula-name">Mapa Mental Animado</div>
+        <span class="aula-tag" style="background:#3b82f618;color:#3b82f6">VISUAL</span>
+      </a>
+      <a class="aula-item" href="flashcards-fisiologia-vegetal.html" target="_blank">
+        <div class="aula-icon">🃏</div>
+        <div class="aula-name">Flashcards de Defensivos</div>
+        <span class="aula-tag" style="background:#22c55e18;color:#22c55e">CARDS</span>
+      </a>
+    </div>
+  </div>
+</div>
+
+<div class="modulo-card" onclick="toggleModulo(this)">
+  <div class="modulo-header">
+    <div class="modulo-icon" style="background:#a855f718">🌿</div>
+    <div class="modulo-info">
+      <div class="modulo-name">Fisiologia Vegetal</div>
+      <div class="modulo-desc">Fotossíntese, hormônios, transpiração</div>
+    </div>
+    <div class="modulo-arrow">›</div>
+  </div>
+  <div class="modulo-content">
+    <div class="aula-list">
+      <a class="aula-item" href="flashcards-fisiologia-vegetal.html" target="_blank">
+        <div class="aula-icon">🃏</div>
+        <div class="aula-name">Flashcards — Fisiologia Vegetal</div>
+        <span class="aula-tag" style="background:#22c55e18;color:#22c55e">CARDS</span>
+      </a>
+      <a class="aula-item" href="agromaster.html" target="_blank">
+        <div class="aula-icon">🧠</div>
+        <div class="aula-name">Quiz — Fisiologia</div>
+        <span class="aula-tag" style="background:#a855f718;color:#a855f7">QUIZ</span>
+      </a>
+    </div>
+  </div>
+</div>
+
+<div class="modulo-card" onclick="toggleModulo(this)">
+  <div class="modulo-header">
+    <div class="modulo-icon" style="background:#22c55e18">🌍</div>
+    <div class="modulo-info">
+      <div class="modulo-name">Solos & Fertilidade</div>
+      <div class="modulo-desc">pH, CTC, nutrientes, calagem</div>
+    </div>
+    <div class="modulo-arrow">›</div>
+  </div>
+  <div class="modulo-content">
+    <div class="aula-list">
+      <a class="aula-item" href="agromaster.html" target="_blank">
+        <div class="aula-icon">🧠</div>
+        <div class="aula-name">Quiz — Solos & Fertilidade</div>
+        <span class="aula-tag" style="background:#a855f718;color:#a855f7">QUIZ</span>
+      </a>
+    </div>
+  </div>
+</div>
+
+<div class="modulo-card" onclick="toggleModulo(this)">
+  <div class="modulo-header">
+    <div class="modulo-icon" style="background:#e8b84b18">🌾</div>
+    <div class="modulo-info">
+      <div class="modulo-name">Culturas Principais</div>
+      <div class="modulo-desc">Soja, milho, café, cana, algodão</div>
+    </div>
+    <div class="modulo-arrow">›</div>
+  </div>
+  <div class="modulo-content">
+    <div class="aula-list">
+      <a class="aula-item" href="agromaster.html" target="_blank">
+        <div class="aula-icon">🧠</div>
+        <div class="aula-name">Quiz — Culturas</div>
+        <span class="aula-tag" style="background:#a855f718;color:#a855f7">QUIZ</span>
+      </a>
+      <a class="aula-item" href="agroquest3d.html" target="_blank">
+        <div class="aula-icon">🌾</div>
+        <div class="aula-name">AgroQuest 3D</div>
+        <span class="aula-tag" style="background:#3b82f618;color:#3b82f6">3D</span>
+      </a>
+    </div>
+  </div>
+</div>
+
+<div class="modulo-card" onclick="toggleModulo(this)">
+  <div class="modulo-header">
+    <div class="modulo-icon" style="background:#4361ee18">🏆</div>
+    <div class="modulo-info">
+      <div class="modulo-name">Simulados & Maratona</div>
+      <div class="modulo-desc">Todos os temas — prepare-se para a prova</div>
+    </div>
+    <div class="modulo-arrow">›</div>
+  </div>
+  <div class="modulo-content">
+    <div class="aula-list">
+      <a class="aula-item" href="agromaster.html" target="_blank">
+        <div class="aula-icon">🏃</div>
+        <div class="aula-name">Maratona — Todos os Temas</div>
+        <span class="aula-tag" style="background:#f9731618;color:#f97316">DIFÍCIL</span>
+      </a>
+      <a class="aula-item" href="quem-quer-ser-agronomo.html" target="_blank">
+        <div class="aula-icon">🎰</div>
+        <div class="aula-name">Quem Quer Ser Agrônomo?</div>
+        <span class="aula-tag" style="background:#e8b84b18;color:#e8b84b">JOGO</span>
+      </a>
+    </div>
+  </div>
+</div>
+```
+
+  </div>
+</div>
+
+<!-- ══════════════════════════
+     ADMIN
+══════════════════════════ -->
+
+<div class="screen" id="admin">
+  <div class="admin-header">
+    <div class="admin-title">⚙️ Painel Admin</div>
+    <button class="aluno-logout" onclick="logout()">Sair</button>
+  </div>
+  <div class="admin-body">
+
+```
+<div class="admin-stat-grid">
+  <div class="admin-stat">
+    <div class="admin-stat-val" id="stat-total">0</div>
+    <div class="admin-stat-lbl">Alunos</div>
+  </div>
+  <div class="admin-stat">
+    <div class="admin-stat-val" id="stat-ativos" style="color:var(--lime)">0</div>
+    <div class="admin-stat-lbl">Ativos</div>
+  </div>
+  <div class="admin-stat">
+    <div class="admin-stat-val" id="stat-pendentes" style="color:#e8b84b">0</div>
+    <div class="admin-stat-lbl">Pendentes</div>
+  </div>
+  <div class="admin-stat">
+    <div class="admin-stat-val" id="stat-receita" style="color:var(--green2)">R$0</div>
+    <div class="admin-stat-lbl">Receita/mês</div>
+  </div>
+</div>
+
+<!-- Config PIX -->
+<div class="admin-pix-info">
+  <div class="admin-pix-title">💚 Configurar chave PIX</div>
+  <div class="pix-config">
+    <div class="input-group">
+      <div class="input-label">Sua chave PIX</div>
+      <input class="input-field" id="admin-pix-key" type="text" placeholder="CPF, email ou telefone">
+    </div>
+    <div class="input-group">
+      <div class="input-label">WhatsApp para contato</div>
+      <input class="input-field" id="admin-whats" type="text" placeholder="5511999999999 (com código do país)">
+    </div>
+    <button class="btn-primary" onclick="salvarConfig()">Salvar configurações</button>
+  </div>
+</div>
+
+<!-- Lista de alunos -->
+<div class="aluno-list">
+  <div class="aluno-list-header">
+    <span>Alunos cadastrados</span>
+    <span style="font-size:12px;color:var(--text2)" id="lista-count">0 alunos</span>
+  </div>
+  <div id="admin-alunos-list"></div>
+</div>
+```
+
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════
+//  STORAGE (simula banco de dados)
+// ════════════════════════════════
+function getDB(){
+  const db = localStorage.getItem('agromaster_db');
+  return db ? JSON.parse(db) : {users:[], config:{pixKey:'', whatsapp:'5511999999999'}};
+}
+function saveDB(db){ localStorage.setItem('agromaster_db', JSON.stringify(db)); }
+function getSession(){ return localStorage.getItem('agromaster_session'); }
+function setSession(email){ localStorage.setItem('agromaster_session', email); }
+function clearSession(){ localStorage.removeItem('agromaster_session'); }
+
+// ════════════════════════════════
+//  NAVEGAÇÃO
+// ════════════════════════════════
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+// ════════════════════════════════
+//  TOAST
+// ════════════════════════════════
+function toast(msg, dur=2500){
+  const el=document.getElementById('toast');
+  el.textContent=msg;el.classList.add('show');
+  clearTimeout(el._t);
+  el._t=setTimeout(()=>el.classList.remove('show'),dur);
+}
+
+// ════════════════════════════════
+//  CADASTRO
+// ════════════════════════════════
+let cadData = {};
+
+function cadastrar(){
+  const nome=document.getElementById('cad-nome').value.trim();
+  const email=document.getElementById('cad-email').value.trim();
+  const whats=document.getElementById('cad-whats').value.trim();
+  const senha=document.getElementById('cad-senha').value;
+  const senha2=document.getElementById('cad-senha2').value;
+
+  // limpa erros
+  document.querySelectorAll('.input-error').forEach(e=>e.classList.remove('show'));
+  let ok=true;
+  if(!nome){document.getElementById('err-nome').classList.add('show');ok=false;}
+  if(!email||!email.includes('@')){document.getElementById('err-email').classList.add('show');ok=false;}
+  if(!whats){document.getElementById('err-whats').classList.add('show');ok=false;}
+  if(senha.length<6){document.getElementById('err-senha').classList.add('show');ok=false;}
+  if(senha!==senha2){document.getElementById('err-senha2').classList.add('show');ok=false;}
+  if(!ok) return;
+
+  const db=getDB();
+  if(db.users.find(u=>u.email===email)){
+    const al=document.getElementById('cad-alert');
+    al.textContent='Este email já está cadastrado. Faça login!';
+    al.className='alert error show';return;
+  }
+
+  cadData={nome,email,whats,senha};
+  // Atualiza PIX display
+  document.getElementById('pix-key-display').textContent=db.config.pixKey||'Chave não configurada';
+  showScreen('pagamento');
+}
+
+// ════════════════════════════════
+//  PAGAMENTO
+// ════════════════════════════════
+function selectPayTab(tab){
+  document.querySelectorAll('.pay-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+  document.getElementById('pay-pix').style.display=tab==='pix'?'block':'none';
+  document.getElementById('pay-card').style.display=tab==='card'?'block':'none';
+}
+
+function copyPix(){
+  const db=getDB();
+  const key=db.config.pixKey||'Configure sua chave PIX no painel admin';
+  navigator.clipboard.writeText(key).then(()=>toast('✅ Chave PIX copiada!')).catch(()=>{
+    toast('Chave: '+key);
+  });
+}
+
+function enviarComprovante(){
+  const comp=document.getElementById('comp-texto').value.trim();
+  if(!comp){toast('⚠️ Descreva seu comprovante!');return;}
+
+  const db=getDB();
+  db.users.push({
+    nome:cadData.nome,
+    email:cadData.email,
+    whats:cadData.whats,
+    senha:cadData.senha,
+    status:'pending',
+    comprovante:comp,
+    dataCad:new Date().toLocaleDateString('pt-BR'),
+    dataAtiv:null,
+  });
+  saveDB(db);
+  showScreen('aguardando');
+}
+
+function pagarCartao(){
+  // Integração Mercado Pago — redireciona para checkout
+  const db=getDB();
+  db.users.push({
+    nome:cadData.nome,
+    email:cadData.email,
+    whats:cadData.whats,
+    senha:cadData.senha,
+    status:'pending',
+    comprovante:'Pagamento cartão MP',
+    dataCad:new Date().toLocaleDateString('pt-BR'),
+    dataAtiv:null,
+  });
+  saveDB(db);
+  toast('💳 Redirecionando para Mercado Pago...');
+  setTimeout(()=>showScreen('aguardando'),1500);
+}
+
+function formatCard(input){
+  let val=input.value.replace(/\D/g,'').substring(0,16);
+  val=val.replace(/(.{4})/g,'$1 ').trim();
+  input.value=val;
+}
+
+// ════════════════════════════════
+//  WHATSAPP
+// ════════════════════════════════
+function abrirWhatsApp(){
+  const db=getDB();
+  const whats=db.config.whatsapp||'5511999999999';
+  const msg=encodeURIComponent(`Olá! Acabei de enviar o comprovante de pagamento do AgroMaster Pro. Meu email: ${cadData.email}. Nome: ${cadData.nome}`);
+  window.open(`https://wa.me/${whats}?text=${msg}`,'_blank');
+}
+
+// ════════════════════════════════
+//  LOGIN
+// ════════════════════════════════
+function login(){
+  const email=document.getElementById('login-email').value.trim();
+  const senha=document.getElementById('login-senha').value;
+  const al=document.getElementById('login-alert');
+
+  if(!email||!senha){
+    al.textContent='Preencha email e senha';al.className='alert error show';return;
+  }
+
+  // Admin login
+  if(email==='admin@agromaster.com'&&senha==='admin123'){
+    setSession('admin');
+    loadAdmin();
+    showScreen('admin');return;
+  }
+
+  const db=getDB();
+  const user=db.users.find(u=>u.email===email&&u.senha===senha);
+  if(!user){
+    al.textContent='Email ou senha incorretos';al.className='alert error show';return;
+  }
+  if(user.status==='pending'){
+    al.textContent='⏳ Seu acesso ainda está sendo verificado. Aguarde!';al.className='alert info show';return;
+  }
+  if(user.status==='blocked'){
+    al.textContent='🚫 Sua conta está bloqueada. Entre em contato.';al.className='alert error show';return;
+  }
+
+  setSession(email);
+  loadAreaAluno(user);
+  showScreen('area-aluno');
+}
+
+function recuperarSenha(){
+  const email=document.getElementById('login-email').value.trim();
+  if(!email){toast('Digite seu email primeiro');return;}
+  const db=getDB();
+  const user=db.users.find(u=>u.email===email);
+  if(!user){toast('Email não encontrado');return;}
+  toast(`📱 Sua senha é: ${user.senha}`,4000);
+}
+
+function logout(){
+  clearSession();
+  showScreen('home');
+}
+
+// ════════════════════════════════
+//  ÁREA DO ALUNO
+// ════════════════════════════════
+function loadAreaAluno(user){
+  document.getElementById('aluno-nome-display').textContent=user.nome.split(' ')[0];
+  document.getElementById('ass-periodo').textContent=`Ativa desde ${user.dataAtiv||'hoje'}`;
+}
+
+function toggleModulo(card){
+  card.classList.toggle('open');
+}
+
+// ════════════════════════════════
+//  ADMIN
+// ════════════════════════════════
+function loadAdmin(){
+  const db=getDB();
+  const users=db.users;
+  const ativos=users.filter(u=>u.status==='active').length;
+  const pendentes=users.filter(u=>u.status==='pending').length;
+
+  document.getElementById('stat-total').textContent=users.length;
+  document.getElementById('stat-ativos').textContent=ativos;
+  document.getElementById('stat-pendentes').textContent=pendentes;
+  document.getElementById('stat-receita').textContent=`R$${(ativos*19.9).toFixed(0)}`;
+  document.getElementById('lista-count').textContent=users.length+' alunos';
+
+  // Config
+  document.getElementById('admin-pix-key').value=db.config.pixKey||'';
+  document.getElementById('admin-whats').value=db.config.whatsapp||'';
+
+  // Lista
+  const list=document.getElementById('admin-alunos-list');
+  list.innerHTML='';
+  if(users.length===0){
+    list.innerHTML='<div style="padding:20px;text-align:center;color:#94a3b8;font-size:14px">Nenhum aluno ainda</div>';
+    return;
+  }
+  users.forEach((u,i)=>{
+    const row=document.createElement('div');
+    row.className='aluno-row';
+    const statusClass=u.status==='active'?'status-active':u.status==='pending'?'status-pending':'status-blocked';
+    const statusLabel=u.status==='active'?'✅ Ativo':u.status==='pending'?'⏳ Pendente':'🚫 Bloqueado';
+    row.innerHTML=`
+      <div class="aluno-avatar">👤</div>
+      <div class="aluno-row-info">
+        <div class="aluno-row-name">${u.nome}</div>
+        <div class="aluno-row-email">${u.email} • ${u.whats}</div>
+        ${u.comprovante?`<div style="font-size:11px;color:#64748b;margin-top:2px">📎 ${u.comprovante.substring(0,50)}...</div>`:''}
+      </div>
+      <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end">
+        <span class="aluno-row-status ${statusClass}">${statusLabel}</span>
+        <div class="admin-action-btns">
+          ${u.status!=='active'?`<button class="admin-btn btn-approve" onclick="aprovarAluno(${i})">✓ Aprovar</button>`:''}
+          ${u.status!=='blocked'?`<button class="admin-btn btn-block" onclick="bloquearAluno(${i})">✗ Bloquear</button>`:''}
+        </div>
+      </div>`;
+    list.appendChild(row);
+  });
+}
+
+function aprovarAluno(idx){
+  const db=getDB();
+  db.users[idx].status='active';
+  db.users[idx].dataAtiv=new Date().toLocaleDateString('pt-BR');
+  saveDB(db);
+  toast(`✅ ${db.users[idx].nome} aprovado! Avise via WhatsApp.`);
+  // Abre WhatsApp automaticamente
+  const whats=db.config.whatsapp||'5511999999999';
+  const msg=encodeURIComponent(`Olá ${db.users[idx].nome}! 🌾 Seu acesso ao AgroMaster Pro foi liberado! Faça login em: ${window.location.href} com o email: ${db.users[idx].email}`);
+  setTimeout(()=>window.open(`https://wa.me/${db.users[idx].whats.replace(/\D/g,'')}?text=${msg}`,'_blank'),800);
+  loadAdmin();
+}
+
+function bloquearAluno(idx){
+  const db=getDB();
+  db.users[idx].status='blocked';
+  saveDB(db);
+  toast(`🚫 ${db.users[idx].nome} bloqueado`);
+  loadAdmin();
+}
+
+function salvarConfig(){
+  const db=getDB();
+  db.config.pixKey=document.getElementById('admin-pix-key').value.trim();
+  db.config.whatsapp=document.getElementById('admin-whats').value.trim();
+  saveDB(db);
+  toast('✅ Configurações salvas!');
+}
+
+// ════════════════════════════════
+//  INIT
+// ════════════════════════════════
+function init(){
+  const session=getSession();
+  if(!session) return;
+
+  if(session==='admin'){
+    loadAdmin();showScreen('admin');return;
+  }
+
+  const db=getDB();
+  const user=db.users.find(u=>u.email===session);
+  if(user&&user.status==='active'){
+    loadAreaAluno(user);showScreen('area-aluno');
+  } else {
+    clearSession();
+  }
+}
+
+init();
+</script>
+
+</body>
+</html>
